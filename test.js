@@ -105,3 +105,8 @@ test(name + ' expires', function (t) {
   })
 });
 
+test('process exit', function (t) {
+  t.end();
+  process.exit();
+})
+

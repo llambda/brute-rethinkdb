@@ -1,6 +1,5 @@
 'use strict';
 var AbstractClientStore = require('express-brute/lib/AbstractClientStore');
-var r = require('rethinkdb');
 
 var RethinkdbStore = module.exports = function (options) {
   var self = this;
@@ -10,11 +9,35 @@ var RethinkdbStore = module.exports = function (options) {
     self.options.tablename = 'brute'
   }
 
-  self.connection = options ? r.connect(options) : r.connect();
-  self.connection.then(function (conn) {
-    self.clearInterval = setInterval(self.clearExpired.bind(self)
-      , self.options.clearInterval || 60000).unref();
+  if (typeof self.options === 'function') {
+    self.r = self.options;
+  } else if (typeof self.options === 'object') {
+    self.r = require('rethinkdbdash')(self.options);
+  } else {
+    throw new TypeError('Invalid options');
+  }
+
+  self.r.tableCreate(self.options.tablename)
+  .run()
+  .catch(function (error) {
+    if (!error.message.indexOf('already exists') > 0) {
+      throw error;
+    }
   })
+  .then(function () {
+    return self.r
+    .table(self.options.tablename)
+    .indexCreate('lifetime')
+    .run()
+    .catch(function (error) {
+      if (!error.message.indexOf('already exists') > 0) {
+        throw error;
+      }  
+    })
+  })
+
+  self.clearInterval = setInterval(self.clearExpired.bind(self),
+   self.options.clearInterval || 60000).unref();
 };
 
 RethinkdbStore.prototype = Object.create(AbstractClientStore.prototype);
@@ -22,46 +45,42 @@ RethinkdbStore.prototype.set = function (key, value, lifetime, callback) {
   var self = this;
   lifetime = lifetime || 0;
 
-  return self.connection.then(function (conn) {
-    return r.table(self.options.tablename)
-    .insert({
-      id: key,
-      lifetime: new Date(Date.now() + lifetime  * 1000),
-      lastRequest: value.lastRequest,
-      firstRequest: value.firstRequest,
-      count: value.count
-    }, {
-      conflict: 'update'
-    })
-    .run(conn)
-  }).asCallback(callback);
+  return self.r.table(self.options.tablename)
+  .insert({
+    id: key,
+    lifetime: new Date(Date.now() + lifetime  * 1000),
+    lastRequest: value.lastRequest,
+    firstRequest: value.firstRequest,
+    count: value.count
+  }, {
+    conflict: 'update'
+  })
+  .run()
+  .asCallback(callback);
 };
 
 RethinkdbStore.prototype.get = function (key, callback) {
   var self = this;
-  return self.connection.then(function (conn) {
-    return r.table(self.options.tablename)
-    .get(key)
-    .run(conn)
-  }).asCallback(callback);
+  return self.r.table(self.options.tablename)
+  .get(key)
+  .run()
+  .asCallback(callback);
 };
 
 RethinkdbStore.prototype.reset = function (key, callback) {
   var self = this;
-  return self.connection.then(function (conn) {
-    return r.table(self.options.tablename)
-    .get(key)
-    .delete()
-    .run(conn)
-  }).asCallback(callback);
+  return self.r.table(self.options.tablename)
+  .get(key)
+  .delete()
+  .run()
+  .asCallback(callback);
 };
 
 RethinkdbStore.prototype.clearExpired = function (callback) {
   var self = this;
-  return self.connection.then(function (conn) {
-    return r.table(self.options.tablename)
-    .filter(r.row('lifetime').lt(new Date()))
-    .delete()
-    .run(conn);
-  }).asCallback(callback);
+  return self.r.table(self.options.tablename)
+  .filter(self.r.row('lifetime').lt(new Date()))
+  .delete()
+  .run()
+  .asCallback(callback);
 };
