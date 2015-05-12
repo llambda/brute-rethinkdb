@@ -1,0 +1,28 @@
+{
+  "name": "brute-rethinkdb",
+  "version": "0.0.1",
+  "description": "RethinkDB store for express-brute",
+  "keywords": [
+    "express",
+    "brute",
+    "rethinkdb"
+  ],
+  "license": "ISC",
+  "private": false,
+  "scripts": {
+    "test": "node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:llambda/brute-rethinkdb.git"
+  },
+  "devDependencies": {
+    "bluebird": "^2.9.25",
+    "tape": "^4.0.0",
+    "lodash": "^3.8.0"
+  },
+  "dependencies": {
+    "express-brute": "^0.5.3",
+    "rethinkdb": "^2.0.0"
+  }
+}
