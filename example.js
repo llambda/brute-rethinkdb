@@ -1,5 +1,5 @@
 const ExpressBrute = require('express-brute');
-const BruteRethinkdb = require('./index.js');
+const BruteRethinkdb = require('brute-rethinkdb');
 
 // You can pass a rethinkdbdash object
 // or rethinkdbdash options object to BruteRethinkdb
