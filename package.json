@@ -1,6 +1,6 @@
 {
   "name": "brute-rethinkdb",
-  "version": "0.0.2",
+  "version": "1.0.0",
   "description": "RethinkDB store for express-brute",
   "keywords": [
     "express",
