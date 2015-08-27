@@ -17,11 +17,11 @@
     "url": "git@github.com:llambda/brute-rethinkdb.git"
   },
   "devDependencies": {
-    "bluebird": "^2.9.25",
-    "tape": "^4.0.0"
+    "bluebird": "^2.9.34",
+    "tape": "^4.2.0"
   },
   "dependencies": {
-    "express-brute": "^0.5.3",
-    "rethinkdbdash": "^2.0.10"
+    "express-brute": "^0.6.0",
+    "rethinkdbdash": "^2.1.6"
   }
 }
