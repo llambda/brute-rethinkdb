@@ -1,18 +1,16 @@
+'use strict';
 const ExpressBrute = require('express-brute');
 const BruteRethinkdb = require('./brute-rethinkdb');
+const Rethinkdbdash = require('rethinkdbdash');
 
-// You can pass a rethinkdbdash object
-// or rethinkdbdash options object to BruteRethinkdb
-// or no parameter to use the defaults.
-// See https://github.com/neumino/rethinkdbdash
-
-var options = {
+let r = new Rethinkdbdash({
     servers: [
         {host: 'localhost', port: 28015},
     ]
-};
+});
 
-var store = new BruteRethinkdb(options);
+// First argument is the rethinkdb instance, second argument is options for the store.
+let store = new BruteRethinkdb(r, {table: 'brute'});
 
 const bruteforce = new ExpressBrute(store, {
 	freeRetries: 2,

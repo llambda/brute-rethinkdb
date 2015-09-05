@@ -1,16 +1,24 @@
 'use strict';
 const Promise = require('bluebird');
 const test = require('tape');
-const Brute = require('./brute-rethinkdb.js');
-const store = Promise.promisifyAll(new Brute());
+const BruteRethinkdb = require('./brute-rethinkdb.js');
+const Rethinkdbdash = require('rethinkdbdash');
 
-const name ='';
+let r = new Rethinkdbdash({
+    servers: [
+        {host: 'localhost', port: 28015},
+    ]
+});
+
+const store = Promise.promisifyAll(new BruteRethinkdb(r));
+
+const name = '';
 
 test(name +' properly instantiate', function (t) {
     t.plan(2);
 
     t.ok(store, name +' exists');
-    t.ok(store instanceof Brute, name +' instanceof');
+    t.ok(store instanceof BruteRethinkdb, name +' instanceof');
 });
 
 

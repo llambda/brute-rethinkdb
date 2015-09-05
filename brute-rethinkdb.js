@@ -1,23 +1,24 @@
 'use strict';
 var AbstractClientStore = require('express-brute/lib/AbstractClientStore');
 
-var RethinkdbStore = module.exports = function (options) {
+var RethinkdbStore = module.exports = function (rethinkdbdash, options) {
     var self = this;
     AbstractClientStore.apply(this, arguments);
+
+    if (rethinkdbdash) {
+        self.r = rethinkdbdash;
+    } else {
+        throw new TypeError('Must supply a rethinkdbdash instance as the first argument');
+    }
+
     self.options = options || {};
+
     if (!self.options.table) {
         self.options.table = 'brute'
     }
-
-    if (typeof self.options === 'function') {
-        self.r = self.options;
-    } else if (typeof self.options === 'object') {
-        self.r = require('rethinkdbdash')(self.options);
-    } else if (options === null || options === undefined) {
-        self.r = require('rethinkdbdash')();
-        options = {};
-    } else {
-        throw new TypeError('Invalid options');
+    if (!self.options.clearInterval) {
+        // Time to run clear expired function.
+        self.options.clearInterval =  60000;
     }
 
     self.r.tableCreate(self.options.table)
@@ -39,8 +40,7 @@ var RethinkdbStore = module.exports = function (options) {
         })
     })
 
-    self.clearInterval = setInterval(self.clearExpired.bind(self),
-    self.options.clearInterval || 60000).unref();
+    self._clearer = setInterval(self.clearExpired.bind(self), self.options.clearInterval).unref();
 };
 
 RethinkdbStore.prototype = Object.create(AbstractClientStore.prototype);
@@ -81,6 +81,7 @@ RethinkdbStore.prototype.reset = function (key, callback) {
 
 RethinkdbStore.prototype.clearExpired = function (callback) {
     var self = this;
+    debugger
     return self.r.table(self.options.table)
     .filter(self.r.row('lifetime').lt(new Date()))
     .delete()
