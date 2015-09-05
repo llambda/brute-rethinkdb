@@ -7,6 +7,7 @@
     "brute",
     "rethinkdb"
   ],
+  "main": "brute-rethinkdb",
   "license": "ISC",
   "private": false,
   "scripts": {
@@ -18,6 +19,7 @@
   },
   "devDependencies": {
     "bluebird": "^2.9.34",
+    "express": "^4.13.3",
     "tape": "^4.2.0"
   },
   "dependencies": {
