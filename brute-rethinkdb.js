@@ -81,7 +81,6 @@ RethinkdbStore.prototype.reset = function (key, callback) {
 
 RethinkdbStore.prototype.clearExpired = function (callback) {
     var self = this;
-    debugger
     return self.r.table(self.options.table)
     .filter(self.r.row('lifetime').lt(new Date()))
     .delete()
